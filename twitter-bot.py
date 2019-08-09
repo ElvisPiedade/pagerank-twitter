@@ -12,7 +12,6 @@ api = tweepy.API(auth)
 
 #Search Tweets with query = machine learning
 def search_tweets(temp_data):
-	print(temp_data)
 	max_tweets = 5
 	query = "machine learning"
 	searched_tweets = [status for status in tweepy.Cursor(api.search, q=query, wait_on_rate_limit=True).items(max_tweets)]
@@ -37,15 +36,15 @@ def search_tweets(temp_data):
 
 	users_df = pd.DataFrame.from_dict(users_info, orient="index")
 	users_df = users_df.set_index('UserID', drop=False)
-	print(users_df)
+	users_df.index.names = ['UserIndex']
+	pdb.set_trace()
+#	temp_data = temp_data.set_index('UserIndex')
+#	temp_data.rename(columns={'Unnamed: 0':'UserID'}, inplace=True)
 
-	temp_data = temp_data.set_index('UserID')
-	temp_data.rename(columns={'Unnamed: 0':'UserID'}, inplace=True)
-	print(temp_data)
 	
 	union_df = pd.concat([temp_data, users_df])
 	
-	union_df['UserID'] = pd.to_numeric(union_df['UserID'])
+#	union_df['UserID'] = pd.to_numeric(union_df['UserID'])
 
 	union_df = union_df.reset_index(drop=True)
 #	temp_data = temp_data.reset_index(drop=True)	
@@ -59,8 +58,8 @@ def search_tweets(temp_data):
 
 		aa = union_df.reindex(idx)
 		aa = aa.set_index('UserID', drop=False)
-
-		aa.to_csv('temp_data.csv')
+		aa.index.names = ['UserIndex']
+		aa.to_csv('users_info.csv')
 		pdb.set_trace()
 		return aa
 	except:
@@ -71,7 +70,8 @@ def search_tweets(temp_data):
 
 def read_file():
 #	df = pd.read_csv('users_data.csv', index_col= 0)
-	df = pd.read_csv('temp_data.csv')
+	df = pd.read_csv('temp_data.csv', index_col = 0)
+	pdb.set_trace()	
 	return df
 
 def getFollowersAndFriends(users):
@@ -87,15 +87,16 @@ temp_df = read_file() #ler o arquivo temporario
 
 usersdf = search_tweets(temp_df)
 
-if usersdf != 0 :
-	df2 = pd.read_csv('users_data.csv', index_col = 'UserID')
+#if usersdf != 0:
+#	df2 = pd.read_csv('users_data.csv', index_col = 'UserID')
 
-	for x in usersdf:
-		df2[x] = usersdf[x]
+#	for x in usersdf:
+#		df2[x] = usersdf[x]
 
-	df2.to_csv('users_data.csv')
+#	df2.to_csv('users_data.csv')
 
-
+#df = pd.read_csv('teste.csv', index_col = 'UserID')
+pdb.set_trace()
 
 #getFollowersAndFriends(df2)
 
