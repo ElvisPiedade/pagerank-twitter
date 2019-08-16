@@ -26,16 +26,17 @@ def getFollowersAndFriends(users):
 		followers = len(users['Followers'][id_user])
 		friends = len(users['Friends'][id_user])
 
-		if (followers == 2 or friends == 2) and count < 5:
+		if (followers == 2 or friends == 2) and count < 2:
 			users['Followers'][id_user] = [follower for follower in tweepy.Cursor(api.followers_ids, screen_name = users['ScreenName'][id_user], wait_on_rate_limit=True).items()]
 			users['Friends'][id_user] = [friend for friend in tweepy.Cursor(api.friends_ids, screen_name = users['ScreenName'][id_user], wait_on_rate_limit=True).items()]
 			count += 1
 			print(count)
+			print(id_user)
 			data = api.rate_limit_status()
 			print(data['resources']['followers']['/followers/ids'])
 			print(data['resources']['friends']['/friends/ids'])
 		else:
-			if count >= 5:
+			if count >= 2:
 				print('funcionou?')
 				users.to_csv('new_users.csv', mode ='w')				
 				break
@@ -62,7 +63,7 @@ def read_file2():
 
 #Search Tweets with query = machine learning
 def search_tweets(temp_data):
-	max_tweets = 500
+	max_tweets = 200
 	query = "machine learning"
 	searched_tweets = [status for status in tweepy.Cursor(api.search, q=query, wait_on_rate_limit=True).items(max_tweets)]
 	
@@ -131,6 +132,7 @@ def removeDuplicateRows():
 	df = pd.read_csv('users_info.csv', index_col = 0)
 	df.drop_duplicates(subset ="UserID", 
                      keep = 'first', inplace = True)
+	print(df.shape[0])
 	df.to_csv('users_info.csv', mode='w')
 
 
@@ -161,9 +163,20 @@ getFollowersAndFriends(read_file())
 
 print("--- %s seconds ---" % (time.perf_counter() - start_time))
 data = api.rate_limit_status()
+ts = int(data['resources']['friends']['/friends/ids']['reset'])
+ts2 = int(data['resources']['followers']['/followers/ids']['reset'])
+ts3 = int(data['resources']['search']['/search/tweets']['reset'])
 
 #reseta a cada 30 min mais ou menos
 print(data['resources']['application'])
 print(data['resources']['search'])
+print(datetime.utcfromtimestamp(ts3).strftime('%Y-%m-%d %H:%M:%S'))
 print(data['resources']['followers']['/followers/ids'])
+print(datetime.utcfromtimestamp(ts2).strftime('%Y-%m-%d %H:%M:%S'))
 print(data['resources']['friends']['/friends/ids'])
+print(datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'))
+
+
+
+# if you encounter a "year is out of range" error the timestamp
+# may be in milliseconds, try `ts /= 1000` in that case
