@@ -63,7 +63,7 @@ def read_file2():
 
 #Search Tweets with query = machine learning
 def search_tweets(temp_data):
-	max_tweets = 2000
+	max_tweets = 500
 	query = "machine learning"
 	searched_tweets = [status for status in tweepy.Cursor(api.search, q=query, wait_on_rate_limit=True).items(max_tweets)]
 	
