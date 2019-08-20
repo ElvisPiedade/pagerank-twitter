@@ -46,15 +46,18 @@ def getFollowersAndFriends(users):
 
 def read_file():
 #	df = pd.read_csv('users_data.csv', index_col= 0)
-	df = pd.read_csv('new_users.csv', index_col = 0)
+	df = pd.read_csv('graph_data.csv', index_col = 0)
 #	pdb.set_trace()	
 	print('leu arquivo new_users')
 	return df
 
 def read_file2():
-#	df = pd.read_csv('users_data.csv', index_col= 0)
 	df = pd.read_csv('users_info.csv', index_col = 0)
+#	df['Checked'] = False
+#	df = df.drop(columns=['Followers', 'Friends'])
+#	df.to_csv('users_info.csv', mode = 'w')
 #	pdb.set_trace()	
+
 	print('leu arquivo users_info')
 	return df
 
@@ -63,7 +66,7 @@ def read_file2():
 
 #Search Tweets with query = machine learning
 def search_tweets(temp_data):
-	max_tweets = 500
+	max_tweets = 2300
 	query = "machine learning"
 	searched_tweets = [status for status in tweepy.Cursor(api.search, q=query, wait_on_rate_limit=True).items(max_tweets)]
 	
@@ -73,25 +76,17 @@ def search_tweets(temp_data):
 	
 	for tweets in searched_tweets:
 		users_info.update({tweets.user.id_str : {
-												 "UserID"			: tweets.user.id_str,
+												 "UserID"			: str(tweets.user.id_str),
 												 "CreatedAt"	 	: tweets.created_at,
+												 "TweetID"			: str(tweets.id_str),
 												 "UserName" 		: tweets.user.name,
 											  	 "ScreenName"		: tweets.user.screen_name,
 												 "FollowersCount"	: tweets.user.followers_count,
 												 "FriendsCount" 	: tweets.user.friends_count,
-												 "Followers" 		: [],
-												 "Friends" 			: []
+												 "Checked"  		: False
 						  						}
 						  })
 
-		tweets_info.update({tweets.user.id_str : { 
-													"UserID"	: tweets.user.id_str,
-													"TweetInfo" : {
-																	"TweetID"	: tweets.id_str,
-																	"CreatedAt" : tweets.created_at
-																  }												
-												 }
-						  })
 
 
 
@@ -144,7 +139,56 @@ removeDuplicateRows()
 
 #getFollowersAndFriends(read_file())
 
+def getFollowersAndFriendsTest(users):
 
+	count=0
+	n = 2000
+	all_data = pd.DataFrame(columns=['UserIndex', 'F_ID', 'Friend_Follower'])
+	
+	for id_user in users.index: 
+		checked = users['Checked'][id_user]
+		
+		if checked == False and count < 2:
+			users['Checked'][id_user] = True	
+			followers_list = [follower for follower in tweepy.Cursor(api.followers_ids, screen_name = users['ScreenName'][id_user], wait_on_rate_limit=True).items()]
+			friends_list = [friend for friend in tweepy.Cursor(api.friends_ids, screen_name = users['ScreenName'][id_user], wait_on_rate_limit=True).items()]
+	
+			followers_group = [followers_list[i * n:(i + 1) * n] for i in range((len(followers_list) + n - 1) // n )]
+			friends_group = [friends_list[i * n:(i + 1) * n] for i in range((len(friends_list) + n - 1) // n )]
+			
+			data_followers = pd.DataFrame(columns=["F_ID"])
+			data_friends = pd.DataFrame(columns=["F_ID"])
+			
+			for list_follower in followers_group:
+				data_followers = data_followers.append({'F_ID': list_follower}, ignore_index=True)
+			
+			for list_friend in friends_group:
+				data_friends = data_friends.append({'F_ID': list_friend}, ignore_index=True)
+
+			pdb.set_trace()
+			data_followers['Friend_Follower'] = 'Follower'
+			data_friends['Friend_Follower'] = 'Friend'
+			
+			
+			data_union = pd.concat([data_friends, data_followers])
+			data_union.insert(loc=0, column='UserIndex', value=id_user)
+
+			all_data = pd.concat([all_data, data_union])
+			
+			data_friends = data_friends[0:0]
+			data_followers = data_followers[0:0]
+			data_union = data_union[0:0]
+			count+=1
+
+#			pdb.set_trace()
+		else:
+			if count >= 2:
+				print('funcionou?')
+				all_data.to_csv('graph_data.csv', mode='a', index=False, header=False)
+				users.to_csv('users_info2.csv', mode='w')
+				break
+
+#getFollowersAndFriendsTest(temp_df)
 
 
 #if usersdf != 0:
