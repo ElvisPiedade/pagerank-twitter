@@ -20,67 +20,8 @@ print(datetime.timestamp(now))
 print(data['resources']['followers']['/followers/ids'])
 print(data['resources']['friends']['/friends/ids'])
 
-def getFollowersAndFriendsTest(users):
-
-	count=0
-	n = 2000
-	all_data = pd.DataFrame(columns=['UserIndex', 'F_ID', 'Friend_Follower'])
-	
-	for id_user in users.index: 
-		checked = users['Checked'][id_user]
-		
-		if checked == False and count < 1:
-			users['Checked'][id_user] = True	
-			followers_list = [follower for follower in tweepy.Cursor(api.followers_ids, screen_name = users['ScreenName'][id_user], wait_on_rate_limit=True).items()]
-			friends_list = [friend for friend in tweepy.Cursor(api.friends_ids, screen_name = users['ScreenName'][id_user], wait_on_rate_limit=True).items()]
-	
-			followers_group = [followers_list[i * n:(i + 1) * n] for i in range((len(followers_list) + n - 1) // n )]
-			friends_group = [friends_list[i * n:(i + 1) * n] for i in range((len(friends_list) + n - 1) // n )]
-			
-			data_followers = pd.DataFrame(columns=["F_ID"])
-			data_friends = pd.DataFrame(columns=["F_ID"])
-			
-			for list_follower in followers_group:
-				data_followers = data_followers.append({'F_ID': list_follower}, ignore_index=True)
-			
-			for list_friend in friends_group:
-				data_friends = data_friends.append({'F_ID': list_friend}, ignore_index=True)
-
-#			pdb.set_trace()
-			data_followers['Friend_Follower'] = 'Follower'
-			data_friends['Friend_Follower'] = 'Friend'
-			
-			
-			data_union = pd.concat([data_friends, data_followers])
-			data_union.insert(loc=0, column='UserIndex', value=id_user)
-
-			all_data = pd.concat([all_data, data_union])
-			
-			data_friends = data_friends[0:0]
-			data_followers = data_followers[0:0]
-			data_union = data_union[0:0]
-			count+=1
-
-#			pdb.set_trace()
-		else:
-			if count >= 1:
-				print('funcionou?')
-				all_data.to_csv('graph_data.csv', mode='a', index=False, header=False)
-				users.to_csv('users_info.csv', mode='w')
-				break
-
-
-
-#1800s = 30 min
 
 def read_file():
-#	df = pd.read_csv('users_data.csv', index_col= 0)
-	df = pd.read_csv('graph_data.csv', index_col = 0)
-#	pdb.set_trace()	
-	print('leu arquivo new_users')
-	return df
-
-def read_file2():
 	df = pd.read_csv('users_info.csv', index_col = 0)
 #	pdb.set_trace()	
 #	df['TweetID'] = df['TweetID'].astype(str)
@@ -127,12 +68,11 @@ def search_tweets(temp_data):
 	users_df.index.names = ['UserIndex']
 
 
-
 	union_df = pd.concat([temp_data, users_df])
 	
 	union_df = union_df.reset_index(drop=True)
 	
-	pdb.set_trace()
+#	pdb.set_trace()
 	try:
 		df_gpby = union_df.groupby(['UserID'])
 		
@@ -142,7 +82,7 @@ def search_tweets(temp_data):
 		aa = union_df.reindex(idx)
 		aa = aa.set_index('UserID', drop=False)
 		aa.index.names = ['UserIndex']
-		pdb.set_trace()
+#		pdb.set_trace()
 		aa.to_csv('users_info.csv', mode ='w')
 
 #		pdb.set_trace()
@@ -163,30 +103,13 @@ def removeDuplicateRows():
 	df.to_csv('users_info.csv', mode='w')
 
 
-temp_df = read_file2() #ler o arquivo temporario
+temp_df = read_file() #ler o arquivo temporario
 
-#usersdf = search_tweets(temp_df)
+usersdf = search_tweets(temp_df)
 
-#removeDuplicateRows()
-
-#getFollowersAndFriends(read_file())
+removeDuplicateRows()
 
 
-getFollowersAndFriendsTest(temp_df)
-
-
-#if usersdf != 0:
-#	df2 = pd.read_csv('users_data.csv', index_col = 'UserID')
-
-#	for x in usersdf:
-#		df2[x] = usersdf[x]
-
-#	df2.to_csv('users_data.csv')
-
-#df = pd.read_csv('teste.csv', index_col = 'UserID')
-#pdb.set_trace()
-
-#getFollowersAndFriends(df2)
 
 
 print("--- %s seconds ---" % (time.perf_counter() - start_time))
@@ -203,8 +126,3 @@ print(data['resources']['followers']['/followers/ids'])
 print(datetime.utcfromtimestamp(ts2).strftime('%Y-%m-%d %H:%M:%S'))
 print(data['resources']['friends']['/friends/ids'])
 print(datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'))
-
-
-
-# if you encounter a "year is out of range" error the timestamp
-# may be in milliseconds, try `ts /= 1000` in that case
