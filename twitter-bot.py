@@ -20,9 +20,8 @@ print(datetime.timestamp(now))
 print(data['resources']['followers']['/followers/ids'])
 print(data['resources']['friends']['/friends/ids'])
 
-
-def read_file():
-	df = pd.read_csv('users_info.csv', index_col = 0)
+def read_file2():
+	df = pd.read_csv('graph_data.csv', index_col = 0)
 #	pdb.set_trace()	
 #	df['TweetID'] = df['TweetID'].astype(str)
 #	df['TweetID'] = " "
@@ -31,7 +30,20 @@ def read_file():
 #	df.to_csv('users_info.csv', mode = 'w')
 
 
-	print('leu arquivo users_info')
+	print('leu arquivo graph_data')
+	return df
+
+def read_file():
+	df = pd.read_csv('users-info.csv', index_col = 0)
+#	pdb.set_trace()	
+#	df['TweetID'] = df['TweetID'].astype(str)
+#	df['TweetID'] = " "
+#	df['Checked'] = False
+#	df = df.drop(columns=['Followers', 'Friends'])
+#	df.to_csv('users_info.csv', mode = 'w')
+
+
+	print('leu arquivo users-info')
 	return df
 
 #t = Timer(1800.0, getFollowersAndFriends(read_file()))
@@ -83,7 +95,7 @@ def search_tweets(temp_data):
 		aa = aa.set_index('UserID', drop=False)
 		aa.index.names = ['UserIndex']
 #		pdb.set_trace()
-		aa.to_csv('users_info.csv', mode ='w')
+		aa.to_csv('users-info.csv', mode ='w')
 
 #		pdb.set_trace()
 		return aa
@@ -96,11 +108,11 @@ def search_tweets(temp_data):
 
 
 def removeDuplicateRows():
-	df = pd.read_csv('users_info.csv', index_col = 0)
+	df = pd.read_csv('users-info.csv', index_col = 0)
 	df.drop_duplicates(subset ="UserID", 
                      keep = 'first', inplace = True)
 	print(df.shape[0])
-	df.to_csv('users_info.csv', mode='w')
+	df.to_csv('users-info.csv', mode='w')
 
 
 temp_df = read_file() #ler o arquivo temporario
@@ -110,6 +122,24 @@ usersdf = search_tweets(temp_df)
 removeDuplicateRows()
 
 
+
+
+def removeDuplicateUsers():
+	users_info = read_file() 
+	graph_data = read_file2() #Todos usuários que estiverem aqui já foram iterados
+	pdb.set_trace()
+	graph_data['idx'] = graph_data.index
+	graph_data.drop_duplicates(subset = "idx", keep= 'first', inplace = True)
+	abcd = list(graph_data['idx'])
+
+	for x in abcd:
+		if users_info['Checked'][x] == False:
+			print(x)
+			users_info['Checked'][x] = True
+
+	users_info.to_csv('update_users_info.csv', mode='w')
+
+#removeDuplicateUsers()
 
 
 print("--- %s seconds ---" % (time.perf_counter() - start_time))

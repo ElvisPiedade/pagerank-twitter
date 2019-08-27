@@ -24,18 +24,14 @@ def getFollowersAndFriends(users):
 
 	count=0
 	n = 1000
-	all_data = pd.DataFrame(columns=['UserIndex', 'F_ID', 'Friend_Follower'])
 	
 	for id_user in users.index: 
 		checked = users['Checked'][id_user]
 		
-		if checked == False and count < 20:
+		if checked == False and count < 100:
 			try:
-				users['Checked'][id_user] = True
-
 				followers_list = []
 				friends_list   = []
-#				followers_list = [follower for follower in tweepy.Cursor(api.followers_ids, screen_name = users['ScreenName'][id_user], wait_on_rate_limit=True).items()]
 			
 				f = 0
 				for follower in tweepy.Cursor(api.followers_ids, screen_name = users['ScreenName'][id_user], wait_on_rate_limit=True).items():
@@ -45,7 +41,7 @@ def getFollowersAndFriends(users):
 						f = 0
 						print(len(followers_list))
 #						pdb.set_trace()
-						time.sleep(70)
+						time.sleep(60)
 
 				f = 0
 				for friend in tweepy.Cursor(api.friends_ids, screen_name = users['ScreenName'][id_user], wait_on_rate_limit=True).items():
@@ -55,8 +51,7 @@ def getFollowersAndFriends(users):
 						f = 0
 						print(len(friends_list))
 #						pdb.set_trace()
-						time.sleep(70)
-#				friends_list = [friend for friend in tweepy.Cursor(api.friends_ids, screen_name = users['ScreenName'][id_user], wait_on_rate_limit=True).items()]
+						time.sleep(60)
 	
 				followers_group = [followers_list[i * n:(i + 1) * n] for i in range((len(followers_list) + n - 1) // n )]
 				friends_group = [friends_list[i * n:(i + 1) * n] for i in range((len(friends_list) + n - 1) // n )]
@@ -77,22 +72,26 @@ def getFollowersAndFriends(users):
 				
 				data_union = pd.concat([data_friends, data_followers])
 				data_union.insert(loc=0, column='UserIndex', value=id_user)
-
-				all_data = pd.concat([all_data, data_union])
+				
+				
+				count+=1
+				users['Checked'][id_user] = True
+				
+				data_union.to_csv('graph_data.csv', mode='a', index=False, header=False)
+				users.to_csv('users-temp.csv', mode='w')
 				
 				data_friends = data_friends[0:0]
 				data_followers = data_followers[0:0]
 				data_union = data_union[0:0]
-				count+=1
-				all_data.to_csv('graph_data.csv', mode='a', index=False, header=False)
-				users.to_csv('users-temp.csv', mode='w')
+
 			except:
 				print("An exception occurred")
+				time.sleep(60)
 #			pdb.set_trace()
 		else:
-			if count >= 20:
+			if count >= 100:
 				print('funcionou?')
-				all_data.to_csv('graph_data.csv', mode='a', index=False, header=False)
+				data_union.to_csv('graph_data.csv', mode='a', index=False, header=False)
 				users.to_csv('users-temp.csv', mode='w')
 				break
 
