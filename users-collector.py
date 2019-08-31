@@ -29,6 +29,7 @@ def getFollowersAndFriends(users):
 		checked = users['Checked'][id_user]
 		
 		if checked == False and count < 100:
+			print(count)
 			try:
 				followers_list = []
 				friends_list   = []
@@ -77,8 +78,8 @@ def getFollowersAndFriends(users):
 				count+=1
 				users['Checked'][id_user] = True
 				
-				data_union.to_csv('graph_data.csv', mode='a', index=False, header=False)
-				users.to_csv('users-temp.csv', mode='w')
+				data_union.to_csv('graph_data_final.csv', mode='a', index=False, header=False)
+				users.to_csv('users-temp2.csv', mode='w')
 				
 				data_friends = data_friends[0:0]
 				data_followers = data_followers[0:0]
@@ -91,14 +92,14 @@ def getFollowersAndFriends(users):
 		else:
 			if count >= 100:
 				print('funcionou?')
-				data_union.to_csv('graph_data.csv', mode='a', index=False, header=False)
-				users.to_csv('users-temp.csv', mode='w')
+#				data_union.to_csv('graph_data.csv', mode='a', index=False, header=False)
+#				users.to_csv('users-temp2.csv', mode='w')
 				break
 
 
 
 def read_file():
-	df = pd.read_csv('users-temp.csv', index_col = 0)
+	df = pd.read_csv('users-temp2.csv', index_col = 0)
 #	pdb.set_trace()	
 #	df['TweetID'] = df['TweetID'].astype(str)
 #	df['TweetID'] = " "

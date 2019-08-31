@@ -1,3 +1,4 @@
+import csv
 import config
 import pandas as pd
 import tweepy
@@ -21,7 +22,7 @@ print(data['resources']['followers']['/followers/ids'])
 print(data['resources']['friends']['/friends/ids'])
 
 def read_file2():
-	df = pd.read_csv('graph_data.csv', index_col = 0)
+	df = pd.read_csv('graph_data_yo.txt', index_col = 0, sep =',')
 #	pdb.set_trace()	
 #	df['TweetID'] = df['TweetID'].astype(str)
 #	df['TweetID'] = " "
@@ -140,6 +141,17 @@ def removeDuplicateUsers():
 	users_info.to_csv('update_users_info.csv', mode='w')
 
 #removeDuplicateUsers()
+
+
+def concatDataFrames():
+
+	df = pd.read_csv('graph_data_final.csv', sep = ",", index_col = 0)
+#	df1 = pd.read_csv('abd.txt', sep = ",", index_col = 0)
+#	df2 = pd.read_csv('graph_data2_c.csv', index_col = 0)
+#	df3 = pd.read_csv('graph_data3_c.csv', index_col = 0)
+	pdb.set_trace()
+
+#concatDataFrames()
 
 
 print("--- %s seconds ---" % (time.perf_counter() - start_time))
